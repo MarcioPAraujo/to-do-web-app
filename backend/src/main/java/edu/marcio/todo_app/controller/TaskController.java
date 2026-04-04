@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -43,8 +44,14 @@ public class TaskController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<TaskResponse> deleteTaskController(@PathVariable Long id) {
+  public ResponseEntity<TaskResponse> deleteTask(@PathVariable Long id) {
     TaskResponse response = taskService.delete(id);
+    return ResponseEntity.status(HttpStatus.OK).body(response);
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<TaskResponse> getTask(@PathVariable Long id) {
+    TaskResponse response = taskService.getTaskById(id);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 
