@@ -25,6 +25,7 @@ import edu.marcio.todo_app.dto.task.TaskRequest;
 import edu.marcio.todo_app.dto.task.TaskRequestEdit;
 import edu.marcio.todo_app.dto.task.TaskResponse;
 import edu.marcio.todo_app.exception.task.DuplicatedNameException;
+import edu.marcio.todo_app.exception.task.NotFoundTaskException;
 import edu.marcio.todo_app.model.Task;
 import edu.marcio.todo_app.repository.TaskRepository;
 
@@ -265,5 +266,24 @@ public class TaskServiceTest {
 
     // Verify the results
     assertEquals(0, result.getContent().size());
+  }
+
+  // The following tests are for the toggleCompleted method
+  @Test
+  void shouldToggleCompletedStatus() {
+    Task task = new Task(1L, "watch movie", false);
+    when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+    when(taskRepository.save(any(Task.class))).thenReturn(new Task(1L, "watch movie", true));
+
+    TaskResponse response = taskService.toggleCompleted(1L);
+    assertEquals(1L, response.getId());
+    assertEquals("watch movie", response.getName());
+    assertEquals(true, response.isCompleted());
+  }
+
+  @Test
+  void shouldThrowExceptionWhenTaskDoesNotExistOnToggleCompleted() {
+    when(taskRepository.findById(1L)).thenReturn(Optional.empty());
+    assertThrows(NotFoundTaskException.class, () -> taskService.toggleCompleted(1L));
   }
 }

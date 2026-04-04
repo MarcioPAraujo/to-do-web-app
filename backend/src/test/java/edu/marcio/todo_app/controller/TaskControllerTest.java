@@ -195,4 +195,26 @@ public class TaskControllerTest {
         .andExpect(jsonPath("$.name").value("watch movie"))
         .andExpect(jsonPath("$.completed").value(false));
   }
+
+  @Test
+  void shouldReturn200WhenToggleTask() throws Exception {
+    TaskResponse response = new TaskResponse(1L, "watch movie", true);
+    when(taskService.toggleCompleted(any())).thenReturn(response);
+
+    mockMvc.perform(put(baseURI() + "/toggleTask/1")
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(1L))
+        .andExpect(jsonPath("$.name").value("watch movie"))
+        .andExpect(jsonPath("$.completed").value(true));
+  }
+
+  @Test
+  void shouldReturn404WhenToggleTaskThatDoesNotExist() throws Exception {
+    when(taskService.toggleCompleted(any())).thenThrow(new NotFoundTaskException(999l));
+
+    mockMvc.perform(put(baseURI() + "/toggleTask/999")
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
 }

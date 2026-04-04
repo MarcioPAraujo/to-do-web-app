@@ -75,6 +75,21 @@ public class TaskService {
     return new TaskResponse(savedTask.getId(), savedTask.getName(), savedTask.isCompleted());
   }
 
+  public TaskResponse toggleCompleted(Long id) {
+    Optional<Task> taskOpt = taskRepository.findById(id);
+    if (taskOpt.isEmpty()) {
+      throw new NotFoundTaskException(id);
+    }
+    Task task = taskOpt.get();
+    task.setCompleted(!task.isCompleted());
+    Optional<Task> saved = Optional.ofNullable(taskRepository.save(task));
+    if (saved.isEmpty()) {
+      throw new RuntimeException("Failed to save task");
+    }
+    Task savedTask = saved.get();
+    return new TaskResponse(savedTask.getId(), savedTask.getName(), savedTask.isCompleted());
+  }
+
   public TaskResponse deleteTask(Long id) {
     Optional<Task> optTask = taskRepository.findById(id);
     if (optTask.isEmpty()) {
