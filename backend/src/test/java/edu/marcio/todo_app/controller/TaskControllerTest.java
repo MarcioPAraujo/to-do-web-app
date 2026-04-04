@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -214,6 +215,28 @@ public class TaskControllerTest {
     when(taskService.toggleCompleted(any())).thenThrow(new NotFoundTaskException(999l));
 
     mockMvc.perform(put(baseURI() + "/toggleTask/999")
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void shouldReturn200WhenDeleteTask() throws Exception {
+    TaskResponse response = new TaskResponse(1L, "watch movie", false);
+    when(taskService.delete(any())).thenReturn(response);
+
+    mockMvc.perform(delete(baseURI() + "/1")
+        .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(1L))
+        .andExpect(jsonPath("$.name").value("watch movie"))
+        .andExpect(jsonPath("$.completed").value(false));
+  }
+
+  @Test
+  void shouldReturn404WhenDeleteTaskThatDoesNotExist() throws Exception {
+    when(taskService.delete(any())).thenThrow(new NotFoundTaskException(999l));
+
+    mockMvc.perform(delete(baseURI() + "/999")
         .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }

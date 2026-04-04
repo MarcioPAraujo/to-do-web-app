@@ -205,7 +205,7 @@ public class TaskServiceTest {
     Task task = new Task(1L, "watch movie", false);
     when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
 
-    TaskResponse response = taskService.deleteTask(1L);
+    TaskResponse response = taskService.delete(1L);
 
     assertEquals(1L, response.getId());
     assertEquals("watch movie", response.getName());
@@ -215,7 +215,7 @@ public class TaskServiceTest {
   @Test
   void shouldThrowExceptionWhenTaskDoesNotExistOnDelete() {
     when(taskRepository.findById(1L)).thenReturn(Optional.empty());
-    assertThrows(RuntimeException.class, () -> taskService.deleteTask(1L));
+    assertThrows(RuntimeException.class, () -> taskService.delete(1L));
   }
 
   // the following tests are for get method

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
@@ -38,6 +39,12 @@ public class TaskController {
   @PutMapping("/toggleTask/{id}")
   public ResponseEntity<TaskResponse> toggleTask(@PathVariable Long id) {
     TaskResponse response = taskService.toggleCompleted(id);
+    return ResponseEntity.status(HttpStatus.OK).body(response);
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<TaskResponse> deleteTaskController(@PathVariable Long id) {
+    TaskResponse response = taskService.delete(id);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 

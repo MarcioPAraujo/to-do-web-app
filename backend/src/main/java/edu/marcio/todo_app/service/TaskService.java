@@ -90,7 +90,7 @@ public class TaskService {
     return new TaskResponse(savedTask.getId(), savedTask.getName(), savedTask.isCompleted());
   }
 
-  public TaskResponse deleteTask(Long id) {
+  public TaskResponse delete(Long id) {
     Optional<Task> optTask = taskRepository.findById(id);
     if (optTask.isEmpty()) {
       throw new NotFoundTaskException(id);
