@@ -1,6 +1,7 @@
 package edu.marcio.todo_app.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -23,6 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import edu.marcio.todo_app.dto.filter.TaskPageFilters;
+import edu.marcio.todo_app.dto.task.TaskRequest;
 import edu.marcio.todo_app.dto.task.TaskResponse;
 import edu.marcio.todo_app.exception.GlobalExceptionHandler;
 import edu.marcio.todo_app.exception.task.DuplicatedNameException;
@@ -43,10 +45,6 @@ public class TaskControllerTest {
 
   private String getRequestJSON(String name) {
     return String.format("{\"name\": \"%s\"}", name);
-  }
-
-  private String getEditRequestJSON(Long id, String name) {
-    return String.format("{\"id\": %d, \"name\": \"%s\"}", id, name);
   }
 
   private String getPageParams(int page, int size) {
@@ -122,11 +120,11 @@ public class TaskControllerTest {
   @Test
   void shouldReturn200WhenEditTask() throws Exception {
     TaskResponse response = new TaskResponse(1L, "watch movie", false);
-    when(taskService.edit(any())).thenReturn(response);
+    when(taskService.edit(eq(1L), any(TaskRequest.class))).thenReturn(response);
 
     mockMvc.perform(put(baseURI() + "/1")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(getEditRequestJSON(1L, "watch movie")))
+        .content(getRequestJSON("watch movie")))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1L))
         .andExpect(jsonPath("$.name").value("watch movie"))
@@ -135,74 +133,74 @@ public class TaskControllerTest {
 
   @Test
   void shouldReturn400WhenEditTaskWithBlankName() throws Exception {
-    when(taskService.edit(any())).thenThrow(new IllegalArgumentException("Task name cannot be blank"));
+    when(taskService.edit(eq(1L), any())).thenThrow(new IllegalArgumentException("Task name cannot be blank"));
 
     mockMvc.perform(put(baseURI() + "/1")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(getEditRequestJSON(1L, "")))
+        .content(getRequestJSON("")))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void shouldReturn400WhenEditTaskWithNullName() throws Exception {
-    when(taskService.edit(any())).thenThrow(new IllegalArgumentException("Task name cannot be blank"));
+    when(taskService.edit(eq(1L), any())).thenThrow(new IllegalArgumentException("Task name cannot be blank"));
 
     mockMvc.perform(put(baseURI() + "/1")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(getEditRequestJSON(1L, null)))
+        .content(getRequestJSON(null)))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void shouldReturn400WhenEditTaskWithNameOnlyHaveSpaces() throws Exception {
-    when(taskService.edit(any())).thenThrow(new IllegalArgumentException("Task name cannot be blank"));
+    when(taskService.edit(eq(1L), any())).thenThrow(new IllegalArgumentException("Task name cannot be blank"));
 
     mockMvc.perform(put(baseURI() + "/1")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(getEditRequestJSON(1L, "   ")))
+        .content(getRequestJSON("   ")))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void shouldReturn400WhenEditTaskWithNameTooLong() throws Exception {
     String longName = "a".repeat(256);
-    when(taskService.edit(any()))
+    when(taskService.edit(eq(1L), any()))
         .thenThrow(new IllegalArgumentException("Task name cannot be longer than 255 characters"));
 
     mockMvc.perform(put(baseURI() + "/1")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(getEditRequestJSON(1L, longName)))
+        .content(getRequestJSON(longName)))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   void shouldReturn409WhenEditTaskWithDuplicatedName() throws Exception {
-    when(taskService.edit(any())).thenThrow(new DuplicatedNameException("watch movie"));
+    when(taskService.edit(eq(1L), any())).thenThrow(new DuplicatedNameException("watch movie"));
 
     mockMvc.perform(put(baseURI() + "/1")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(getEditRequestJSON(1L, "watch movie")))
+        .content(getRequestJSON("watch movie")))
         .andExpect(status().isConflict());
   }
 
   @Test
   void shouldReturn404WhenEditTaskThatDoesNotExist() throws Exception {
-    when(taskService.edit(any())).thenThrow(new NotFoundTaskException(999l));
+    when(taskService.edit(eq(999L), any())).thenThrow(new NotFoundTaskException(999l));
 
     mockMvc.perform(put(baseURI() + "/999")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(getEditRequestJSON(999L, "watch movie")))
+        .content(getRequestJSON("watch movie")))
         .andExpect(status().isNotFound());
   }
 
   @Test
   void shouldReturn200WhenNameKeepTheSameOnEdit() throws Exception {
     TaskResponse response = new TaskResponse(1L, "watch movie", false);
-    when(taskService.edit(any())).thenReturn(response);
+    when(taskService.edit(eq(1L), any())).thenReturn(response);
 
     mockMvc.perform(put(baseURI() + "/1")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(getEditRequestJSON(1L, "watch movie")))
+        .content(getRequestJSON("watch movie")))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(1L))
         .andExpect(jsonPath("$.name").value("watch movie"))

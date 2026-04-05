@@ -25,7 +25,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import edu.marcio.todo_app.dto.filter.TaskPageFilters;
 import edu.marcio.todo_app.dto.task.TaskRequest;
-import edu.marcio.todo_app.dto.task.TaskRequestEdit;
 import edu.marcio.todo_app.dto.task.TaskResponse;
 import edu.marcio.todo_app.exception.task.DuplicatedNameException;
 import edu.marcio.todo_app.exception.task.NotFoundTaskException;
@@ -116,9 +115,9 @@ public class TaskServiceTest {
     Task task = new Task(1L, "watch movie", false);
     when(taskRepository.findById(1L)).thenReturn(java.util.Optional.of(task));
 
-    TaskRequestEdit request = new TaskRequestEdit(1L, null, false);
+    TaskRequest request = new TaskRequest(null);
 
-    assertThrows(IllegalArgumentException.class, () -> taskService.edit(request));
+    assertThrows(IllegalArgumentException.class, () -> taskService.edit(1L, request));
   }
 
   @Test
@@ -126,9 +125,9 @@ public class TaskServiceTest {
     Task task = new Task(1L, "watch movie", false);
     when(taskRepository.findById(1L)).thenReturn(java.util.Optional.of(task));
 
-    TaskRequestEdit request = new TaskRequestEdit(1L, "   ", false);
+    TaskRequest request = new TaskRequest("   ");
 
-    assertThrows(IllegalArgumentException.class, () -> taskService.edit(request));
+    assertThrows(IllegalArgumentException.class, () -> taskService.edit(1L, request));
   }
 
   @Test
@@ -137,9 +136,9 @@ public class TaskServiceTest {
     when(taskRepository.findById(1L)).thenReturn(java.util.Optional.of(task));
 
     String longTitle = "a".repeat(256);
-    TaskRequestEdit request = new TaskRequestEdit(1L, longTitle, false);
+    TaskRequest request = new TaskRequest(longTitle);
 
-    assertThrows(IllegalArgumentException.class, () -> taskService.edit(request));
+    assertThrows(IllegalArgumentException.class, () -> taskService.edit(1L, request));
   }
 
   @Test
@@ -148,9 +147,9 @@ public class TaskServiceTest {
 
     taskRepository.save(task);
 
-    TaskRequestEdit request = new TaskRequestEdit(2L, "watch movie", false);
+    TaskRequest request = new TaskRequest("watch movie");
 
-    assertThrows(RuntimeException.class, () -> taskService.edit(request));
+    assertThrows(RuntimeException.class, () -> taskService.edit(2L, request));
   }
 
   @Test
@@ -158,9 +157,9 @@ public class TaskServiceTest {
     Task task = new Task(1L, "watch movie", false);
     when(taskRepository.findById(1L)).thenReturn(java.util.Optional.of(task));
 
-    TaskRequestEdit request = new TaskRequestEdit(1L, "", false);
+    TaskRequest request = new TaskRequest("");
 
-    assertThrows(IllegalArgumentException.class, () -> taskService.edit(request));
+    assertThrows(IllegalArgumentException.class, () -> taskService.edit(1L, request));
   }
 
   @Test
@@ -169,7 +168,7 @@ public class TaskServiceTest {
     when(taskRepository.findById(1L)).thenReturn(java.util.Optional.of(task));
     when(taskRepository.existsByNameAndIdNot("watch movie", 1L)).thenReturn(true);
 
-    assertThrows(DuplicatedNameException.class, () -> taskService.edit(new TaskRequestEdit(1L, "watch movie", false)));
+    assertThrows(DuplicatedNameException.class, () -> taskService.edit(1L, new TaskRequest("watch movie")));
   }
 
   @Test
@@ -179,8 +178,8 @@ public class TaskServiceTest {
     when(taskRepository.existsByNameAndIdNot("watch movie", 1L)).thenReturn(false);
     when(taskRepository.save(any(Task.class))).thenReturn(task);
 
-    TaskRequestEdit request = new TaskRequestEdit(1L, "watch movie", false);
-    TaskResponse response = taskService.edit(request);
+    TaskRequest request = new TaskRequest("watch movie");
+    TaskResponse response = taskService.edit(1L, request);
 
     assertEquals(1L, response.getId());
     assertEquals("watch movie", response.getName());
@@ -194,12 +193,12 @@ public class TaskServiceTest {
     when(taskRepository.existsByNameAndIdNot("watch movie", 1L)).thenReturn(false);
     when(taskRepository.save(any(Task.class))).thenReturn(task);
 
-    TaskRequestEdit request = new TaskRequestEdit(1L, "watch movie", true);
-    TaskResponse response = taskService.edit(request);
+    TaskRequest request = new TaskRequest("watch movie");
+    TaskResponse response = taskService.edit(1L, request);
 
     assertEquals(1L, response.getId());
     assertEquals("watch movie", response.getName());
-    assertEquals(true, response.isCompleted());
+    assertEquals(false, response.isCompleted());
   }
 
   // The following tests are for the delete method

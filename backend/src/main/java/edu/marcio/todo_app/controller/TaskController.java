@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.marcio.todo_app.dto.filter.TaskPageFilters;
 import edu.marcio.todo_app.dto.task.TaskRequest;
-import edu.marcio.todo_app.dto.task.TaskRequestEdit;
 import edu.marcio.todo_app.dto.task.TaskResponse;
 import edu.marcio.todo_app.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +35,8 @@ public class TaskController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<TaskResponse> editTask(@PathVariable String id, @RequestBody TaskRequestEdit editRequest) {
-    TaskResponse response = taskService.edit(editRequest);
+  public ResponseEntity<TaskResponse> editTask(@PathVariable Long id, @RequestBody TaskRequest editRequest) {
+    TaskResponse response = taskService.edit(id, editRequest);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 

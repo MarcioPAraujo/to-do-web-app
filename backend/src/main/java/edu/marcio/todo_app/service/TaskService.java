@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import edu.marcio.todo_app.dto.filter.TaskPageFilters;
 import edu.marcio.todo_app.dto.task.TaskRequest;
-import edu.marcio.todo_app.dto.task.TaskRequestEdit;
 import edu.marcio.todo_app.dto.task.TaskResponse;
 import edu.marcio.todo_app.exception.task.DuplicatedNameException;
 import edu.marcio.todo_app.exception.task.NotFoundTaskException;
@@ -34,12 +33,18 @@ public class TaskService {
       throw new IllegalArgumentException("Task name cannot be longer than 255 characters");
     }
 
-    if (taskRepository.existsByName(name)) {
+    Boolean exists = taskRepository.existsByName(name);
+
+    if (exists) {
       throw new DuplicatedNameException(name);
     }
 
-    Task task = new Task(null, name, false);
+    Task task = new Task();
+    task.setName(name);
+    task.setCompleted(false);
+
     Optional<Task> saved = Optional.ofNullable(taskRepository.save(task));
+
     if (saved.isEmpty()) {
       throw new RuntimeException("Failed to save task");
     }
@@ -47,8 +52,7 @@ public class TaskService {
     return new TaskResponse(savedTask.getId(), savedTask.getName(), savedTask.isCompleted());
   }
 
-  public TaskResponse edit(TaskRequestEdit request) {
-    Long id = request.getId();
+  public TaskResponse edit(Long id, TaskRequest request) {
     Optional<Task> taskOpt = taskRepository.findById(id);
     if (taskOpt.isEmpty()) {
       throw new NotFoundTaskException(id);
@@ -68,7 +72,7 @@ public class TaskService {
       throw new DuplicatedNameException(name);
     }
     task.setName(name);
-    task.setCompleted(request.getCompleted());
+    task.setCompleted(task.isCompleted());
     Optional<Task> saved = Optional.ofNullable(taskRepository.save(task));
     if (saved.isEmpty()) {
       throw new RuntimeException("Failed to save task");
