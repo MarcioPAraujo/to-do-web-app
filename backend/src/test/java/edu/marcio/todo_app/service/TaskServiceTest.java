@@ -3,6 +3,7 @@ package edu.marcio.todo_app.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,7 +21,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
+import edu.marcio.todo_app.dto.filter.TaskPageFilters;
 import edu.marcio.todo_app.dto.task.TaskRequest;
 import edu.marcio.todo_app.dto.task.TaskRequestEdit;
 import edu.marcio.todo_app.dto.task.TaskResponse;
@@ -245,9 +248,11 @@ public class TaskServiceTest {
     Pageable pageable = PageRequest.of(0, 10, Sort.by("id").ascending());
     Page<Task> taskPage = new PageImpl<>(List.of(task1, task2), pageable, 2);
 
-    when(taskRepository.findAll(pageable)).thenReturn(taskPage);
+    TaskPageFilters filters = new TaskPageFilters();
 
-    Page<TaskResponse> result = taskService.getAllTasks(pageable);
+    when(taskRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(taskPage);
+
+    Page<TaskResponse> result = taskService.getAllTasks(pageable, filters);
 
     // Verify the results
     assertEquals(2, result.getContent().size());
@@ -260,12 +265,31 @@ public class TaskServiceTest {
     Pageable pageable = PageRequest.of(0, 10, Sort.by("id").ascending());
     Page<Task> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-    when(taskRepository.findAll(pageable)).thenReturn(emptyPage);
+    when(taskRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(emptyPage);
 
-    Page<TaskResponse> result = taskService.getAllTasks(pageable);
+    TaskPageFilters filters = new TaskPageFilters();
+    Page<TaskResponse> result = taskService.getAllTasks(pageable, filters);
 
     // Verify the results
     assertEquals(0, result.getContent().size());
+  }
+
+  @Test
+  void shouldReturnTasksWithTheFilteredTitle() {
+    Task task1 = new Task(1L, "watch movie", false);
+
+    Pageable pageable = PageRequest.of(0, 10, Sort.by("id").ascending());
+    Page<Task> taskPage = new PageImpl<>(List.of(task1), pageable, 1);
+
+    when(taskRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(taskPage);
+    TaskPageFilters filters = new TaskPageFilters();
+    filters.setName("watch");
+
+    Page<TaskResponse> result = taskService.getAllTasks(pageable, filters);
+
+    // Verify the results
+    assertEquals(1, result.getContent().size());
+    assertEquals("watch movie", result.getContent().get(0).getName());
   }
 
   // The following tests are for the toggleCompleted method

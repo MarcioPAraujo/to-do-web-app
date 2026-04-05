@@ -4,8 +4,10 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import edu.marcio.todo_app.dto.filter.TaskPageFilters;
 import edu.marcio.todo_app.dto.task.TaskRequest;
 import edu.marcio.todo_app.dto.task.TaskRequestEdit;
 import edu.marcio.todo_app.dto.task.TaskResponse;
@@ -13,6 +15,7 @@ import edu.marcio.todo_app.exception.task.DuplicatedNameException;
 import edu.marcio.todo_app.exception.task.NotFoundTaskException;
 import edu.marcio.todo_app.model.Task;
 import edu.marcio.todo_app.repository.TaskRepository;
+import edu.marcio.todo_app.specifications.TaskSpecification;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -114,8 +117,19 @@ public class TaskService {
     return new TaskResponse(task.getId(), task.getName(), task.isCompleted());
   }
 
-  public Page<TaskResponse> getAllTasks(Pageable pageable) {
-    return taskRepository.findAll(pageable)
+  public Page<TaskResponse> getAllTasks(Pageable pageable, TaskPageFilters filters) {
+
+    if (pageable.getPageNumber() < 0) {
+      throw new IllegalArgumentException("Page number cannot be negative");
+    }
+
+    if (pageable.getPageSize() <= 0) {
+      throw new IllegalArgumentException("Page size must be greater than zero");
+    }
+
+    Specification<Task> spec = Specification.where(TaskSpecification.hasTitle(filters.getName()))
+        .and(TaskSpecification.hasCompleted(filters.getCompleted()));
+    return taskRepository.findAll(spec, pageable)
         .map(task -> new TaskResponse(task.getId(), task.getName(), task.isCompleted()));
   }
 }
