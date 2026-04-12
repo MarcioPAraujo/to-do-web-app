@@ -61,6 +61,7 @@ public class TaskController {
   @GetMapping()
   public ResponseEntity<Page<TaskResponse>> getListOfTask(Pageable pageable,
       @ModelAttribute TaskPageFilters filters) {
+    System.out.println("filters: " + filters);
     Page<TaskResponse> response = taskService.getAllTasks(pageable, filters);
 
     return ResponseEntity.status(HttpStatus.OK).body(response);
