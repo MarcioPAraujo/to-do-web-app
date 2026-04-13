@@ -1,9 +1,9 @@
 declare module "*.css" {
-  const content: { [className: string]: string };
+  const content: { readonly [key: string]: string };
   export default content;
 }
 
 declare module "*.module.css" {
-  const content: { [className: string]: string };
+  const content: { readonly [key: string]: string };
   export default content;
 }

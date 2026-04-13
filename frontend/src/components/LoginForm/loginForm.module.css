@@ -1,0 +1,75 @@
+.formContainer {
+  width: 100dvw;
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form{
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding: 2rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  width: 30rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.field {
+  display: flex;;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  position: relative;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.input{
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  padding: 0 0.5rem;
+
+  &:focus {
+    outline: none;
+    border-color: #0070f3;
+  }
+}
+
+.errorMessage {
+  color: red;
+  font-size: 0.875rem;
+  position: absolute;
+  bottom: -1.2rem;
+}
+
+.submitButton {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: #0070f3;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 3rem;
+  height: 2.5rem;
+}
+
+.registerLink {
+  text-align: center;
+  margin-top: 1rem;
+  &:hover {
+    text-decoration: underline;
+    color: #0070f3;
+  }
+}
