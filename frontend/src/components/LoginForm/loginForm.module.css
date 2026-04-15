@@ -14,6 +14,7 @@
   border: 1px solid #ccc;
   border-radius: 0.5rem;
   width: 30rem;
+  background-color: #f0f0f0;
 }
 
 .title {
@@ -39,6 +40,9 @@
   border-radius: 0.5rem;
   border: 1px solid #ccc;
   padding: 0 0.5rem;
+  background-color: #fdfdfd;
+
+
 
   &:focus {
     outline: none;

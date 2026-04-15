@@ -5,6 +5,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import styles from "./loginForm.module.css";
 import Link from "next/link";
+import { LoginBodyRequest } from "@/interfaces/login/LoginBodyRequest";
+import { loginService } from "@/services/loginService";
 
 export const LoginForm: React.FC = () => {
   const {
@@ -16,8 +18,17 @@ export const LoginForm: React.FC = () => {
     resolver: yupResolver(LoginSchema),
   });
 
-  const onSubmit = (data: LoginSchemaType) => {
-    console.log(data);
+  const onSubmit = async (data: LoginSchemaType) => {
+    const body: LoginBodyRequest = {
+      email: data.email,
+      password: data.password,
+    };
+
+    try {
+      await loginService(body);
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
   return (
@@ -32,6 +43,7 @@ export const LoginForm: React.FC = () => {
             className={styles.input}
             id="email"
             type="text"
+            placeholder="Enter your email"
             {...register("email")}
           />
           {errors.email && (
@@ -46,6 +58,7 @@ export const LoginForm: React.FC = () => {
             className={styles.input}
             id="password"
             type="password"
+            placeholder="Enter your password"
             {...register("password")}
           />
           {errors.password && (
