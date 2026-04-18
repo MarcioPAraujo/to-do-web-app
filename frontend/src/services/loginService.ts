@@ -5,6 +5,7 @@ import { api } from "./api";
 import { LoginResponse } from "@/interfaces/login/LoginResponse";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { COOKIES_KEYS } from "@/utils/cookiesKeys";
 
 export const loginService = async (body: LoginBodyRequest): Promise<void> => {
   const endpoint = "/auth/login";
@@ -15,7 +16,7 @@ export const loginService = async (body: LoginBodyRequest): Promise<void> => {
 
   const cookieStore = await cookies();
 
-  cookieStore.set("token", token, {
+  cookieStore.set(COOKIES_KEYS.token, token, {
     httpOnly: true,
     sameSite: "lax",
     maxAge: 60 * 60 * 24, // 1 day
