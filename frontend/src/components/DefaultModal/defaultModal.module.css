@@ -1,0 +1,80 @@
+.background {
+  position: fixed;
+  height: 100dvh;
+  width: 100dvw;
+
+  top: 0;
+  left: 0;
+
+  display: grid;
+  place-items: center;
+
+  background-color: rgba(0, 0, 0, 0.3);
+
+  z-index: 9;
+}
+
+.content {
+  position: relative;
+  z-index: 99;
+  background-color: white;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: 0.25rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  min-width: 25rem;
+}
+
+.title {
+  color: #2d2d2d;
+}
+
+.message {
+  font-size: 1.125rem;
+}
+
+.buttonsContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.button {
+  height: 2rem;
+  padding: 0 0.5rem;
+  border-radius: 0.5rem;
+  border-style: solid;
+  border-width: 1px;
+  font-size: 1.125rem;
+}
+
+.confirmButton {
+  color: white;
+}
+
+.confirmError {
+  background-color: var(--error);
+  border-color: var(--error);
+}
+.confirmSuccess {
+  background-color: var(--success);
+  border-color: var(--success);
+}
+
+.cancelButton {
+  background-color: white;
+}
+
+.cancelError {
+  border-color: var(--error);
+  color: var(--error);
+}
+.cancelSuccess {
+  border-color: var(--success);
+  color: var(--success);
+}
