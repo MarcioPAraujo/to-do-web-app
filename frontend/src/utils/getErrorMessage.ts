@@ -1,8 +1,9 @@
 import { IBackendErrorResponse } from "@/interfaces/BackendErrorResponse";
+import { AxiosError } from "axios";
 
 export const isBackendError = (
   error: unknown,
-): error is IBackendErrorResponse => {
+): error is AxiosError<IBackendErrorResponse> => {
   if (!error || typeof error !== "object") {
     return false;
   }
@@ -32,6 +33,10 @@ export const isBackendError = (
 };
 
 export const getErrorMessage = (error: unknown): string => {
+  console.log(error);
+  if (error instanceof Error) {
+    return error.message;
+  }
   if (isBackendError(error)) {
     return error?.message;
   }

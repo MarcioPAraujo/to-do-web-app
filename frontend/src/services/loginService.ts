@@ -1,18 +1,35 @@
 "use server";
 
 import { LoginBodyRequest } from "@/interfaces/login/LoginBodyRequest";
-import { api } from "./api";
 import { LoginResponse } from "@/interfaces/login/LoginResponse";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { COOKIES_KEYS } from "@/utils/cookiesKeys";
+import { handleProxyRequest } from "@/app/api/proxy/[...slug]/route";
+import { baseUrl } from "./api";
+import { IBackendErrorResponse } from "@/interfaces/BackendErrorResponse";
 
 export const loginService = async (body: LoginBodyRequest): Promise<void> => {
-  const endpoint = "/auth/login";
+  const endpoint = `${baseUrl}/auth/login`;
 
-  const response = await api.post<LoginResponse>(endpoint, body);
+  const response = await handleProxyRequest(
+    new Request(endpoint, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+    {
+      params: Promise.resolve({ slug: ["auth", "login"] }),
+    },
+  );
 
-  const { token } = response.data;
+  if (!response.ok) {
+    const errorData: IBackendErrorResponse = await response.json();
+    throw new Error(errorData.message);
+  }
+
+  const data: LoginResponse = await response.json();
+
+  const { token } = data;
 
   const cookieStore = await cookies();
 

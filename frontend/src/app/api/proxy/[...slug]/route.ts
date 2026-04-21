@@ -1,47 +1,52 @@
 import { IBackendErrorResponse } from "@/interfaces/BackendErrorResponse";
-import { api } from "@/services/api";
+import { baseUrl } from "@/services/api";
 import { COOKIES_KEYS } from "@/utils/cookiesKeys";
-import { AxiosError, isAxiosError } from "axios";
+import { isBackendError } from "@/utils/getErrorMessage";
+import axios, { isAxiosError } from "axios";
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 interface IProxyRequestParams {
   params: Promise<{ slug: string[] }>;
 }
 
-const isBackendError = (
+const handleErrorResponse = (
   error: unknown,
-): error is AxiosError<IBackendErrorResponse> => {
-  if (!error || typeof error !== "object") {
-    return false;
+): NextResponse<IBackendErrorResponse> => {
+  let errorResponse: IBackendErrorResponse = {
+    status: 500,
+    error: "Internal Server Error",
+    message: "An error occurred while processing the request",
+    timestamp: new Date().toISOString(),
+  };
+  if (isAxiosError(error)) {
+    errorResponse = {
+      status: error.response?.status || 500,
+      error: error.response?.statusText || "Error",
+      message: error.response?.data?.message,
+      timestamp: new Date().toISOString(),
+    };
+  }
+  // backend error
+  if (isBackendError(error)) {
+    errorResponse = {
+      status: error.response?.status || 500,
+      error: error.response?.statusText || "Error",
+      message: error.response?.data?.message || "An error occurred",
+      timestamp: new Date().toISOString(),
+    };
   }
 
-  if (!("response" in error)) {
-    return false;
-  }
-
-  if (typeof error.response !== "object" || error.response === null) {
-    return false;
-  }
-
-  if (
-    !("status" in error.response) ||
-    typeof error.response.status !== "number"
-  ) {
-    return false;
-  }
-
-  return (
-    error &&
-    typeof error === "object" &&
-    "response" in error &&
-    typeof error.response === "object" &&
-    "status" in error.response
+  return new NextResponse<IBackendErrorResponse>(
+    JSON.stringify(errorResponse),
+    {
+      status: errorResponse.status,
+    },
   );
 };
 
 export async function handleProxyRequest(
-  request: NextRequest,
+  request: Request,
   { params }: IProxyRequestParams,
 ) {
   const { slug } = await params;
@@ -53,50 +58,23 @@ export async function handleProxyRequest(
 
   const body = request.method !== "GET" ? await request.text() : undefined;
 
+  const finalUrl = `${baseUrl}${path}${search}`;
+
   try {
-    const response = await api.request({
+    const response = await axios(finalUrl, {
       method: request.method,
-      url: `/${path}${search}`,
-      data: body,
       headers: {
-        Authorization: token ? `Bearer ${token}` : undefined,
-        "Content-Type": request.headers.get("Content-Type") || undefined,
+        "Content-Type": "application/json",
+        Authorization: token ? `Bearer ${token}` : "",
       },
+      data: body,
     });
-    return new NextResponse(response.data, {
+
+    return new NextResponse(JSON.stringify(response.data), {
       status: response.status,
     });
   } catch (error) {
-    if (isAxiosError(error)) {
-      return new NextResponse(
-        JSON.stringify({
-          message: error.response?.data?.message || error.message,
-        }),
-        {
-          status: error.response?.status || 500,
-        },
-      );
-    }
-    // backend error
-
-    if (isBackendError(error)) {
-      return new NextResponse(
-        JSON.stringify({
-          message: error.response?.data.message || "An error occurred",
-        }),
-        {
-          status: error.response?.status || 500,
-        },
-      );
-    }
-
-    // unknown error
-    return new NextResponse(
-      JSON.stringify({ message: "An unknown error occurred" }),
-      {
-        status: 500,
-      },
-    );
+    return handleErrorResponse(error);
   }
 }
 
