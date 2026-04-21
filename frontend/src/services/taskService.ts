@@ -1,12 +1,13 @@
-import { handleProxyRequest } from "@/app/api/proxy/[...slug]/route";
+import { ITaskListingRequestParams } from "@/interfaces/tasks/TaskListingRequestParams";
+import { ITaskListingResponse } from "@/interfaces/tasks/TasksListingResponse";
+import { api } from "./api";
 
-export const getTasksListService = async () => {
-  const response = await handleProxyRequest(
-    new Request("/api/tasks", {
-      method: "GET",
-    }),
-    {
-      params: Promise.resolve({ slug: ["tasks"] }),
-    },
-  );
+export const getTasksListService = async (
+  params: ITaskListingRequestParams,
+): Promise<ITaskListingResponse> => {
+  const fetchUrl = `/api/tasks`;
+
+  const response = await api.get<ITaskListingResponse>(fetchUrl, { params });
+
+  return response.data;
 };

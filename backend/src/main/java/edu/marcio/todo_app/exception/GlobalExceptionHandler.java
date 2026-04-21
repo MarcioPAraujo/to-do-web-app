@@ -4,6 +4,10 @@ import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -35,6 +39,50 @@ public class GlobalExceptionHandler {
         .status(HttpStatus.NOT_FOUND)
         .body(
             new ErrorResponse(404, "Not Found", e.getMessage(), LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(BadCredentialsException.class)
+  public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException e) {
+    return ResponseEntity
+        .status(HttpStatus.UNAUTHORIZED)
+        .body(new ErrorResponse(
+            401,
+            "Unauthorized",
+            "Invalid email or password",
+            LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(UsernameNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleUsernameNotFound(UsernameNotFoundException e) {
+    return ResponseEntity
+        .status(HttpStatus.UNAUTHORIZED)
+        .body(new ErrorResponse(
+            401,
+            "Unauthorized",
+            "Invalid email or password",
+            LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(DisabledException.class)
+  public ResponseEntity<ErrorResponse> handleDisabled(DisabledException e) {
+    return ResponseEntity
+        .status(HttpStatus.UNAUTHORIZED)
+        .body(new ErrorResponse(
+            401,
+            "Unauthorized",
+            "Account is disabled",
+            LocalDateTime.now()));
+  }
+
+  @ExceptionHandler(LockedException.class)
+  public ResponseEntity<ErrorResponse> handleLocked(LockedException e) {
+    return ResponseEntity
+        .status(HttpStatus.UNAUTHORIZED)
+        .body(new ErrorResponse(
+            401,
+            "Unauthorized",
+            "Account is locked",
+            LocalDateTime.now()));
   }
 
   @ExceptionHandler(Exception.class)

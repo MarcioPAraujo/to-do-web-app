@@ -5,22 +5,19 @@ import { LoginResponse } from "@/interfaces/login/LoginResponse";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { COOKIES_KEYS } from "@/utils/cookiesKeys";
-import { handleProxyRequest } from "@/app/api/proxy/[...slug]/route";
-import { baseUrl } from "./api";
 import { IBackendErrorResponse } from "@/interfaces/BackendErrorResponse";
 
 export const loginService = async (body: LoginBodyRequest): Promise<void> => {
-  const endpoint = `${baseUrl}/auth/login`;
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER;
+  const fetchUrl = `${serverUrl}/auth/login`;
 
-  const response = await handleProxyRequest(
-    new Request(endpoint, {
-      method: "POST",
-      body: JSON.stringify(body),
-    }),
-    {
-      params: Promise.resolve({ slug: ["auth", "login"] }),
+  const response = await fetch(fetchUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify(body),
+  });
 
   if (!response.ok) {
     const errorData: IBackendErrorResponse = await response.json();

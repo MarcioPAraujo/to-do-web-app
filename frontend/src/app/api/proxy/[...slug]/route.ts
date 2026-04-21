@@ -1,9 +1,7 @@
 import { IBackendErrorResponse } from "@/interfaces/BackendErrorResponse";
 import { baseUrl } from "@/services/api";
-import { COOKIES_KEYS } from "@/utils/cookiesKeys";
 import { isBackendError } from "@/utils/getErrorMessage";
 import axios, { isAxiosError } from "axios";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 interface IProxyRequestParams {
@@ -50,8 +48,6 @@ export async function handleProxyRequest(
   { params }: IProxyRequestParams,
 ) {
   const { slug } = await params;
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIES_KEYS.token)?.value;
 
   const path = slug.join("/");
   const { search } = new URL(request.url);
@@ -65,7 +61,7 @@ export async function handleProxyRequest(
       method: request.method,
       headers: {
         "Content-Type": "application/json",
-        Authorization: token ? `Bearer ${token}` : "",
+        Authorization: request.headers.get("Authorization") || "",
       },
       data: body,
     });
